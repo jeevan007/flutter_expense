@@ -182,57 +182,120 @@ class _ExpennseTrackerState extends State<ExpenseTracker> {
 
             Expanded(
               child: ListView.builder(
-                itemCount:
-                    listItems.length, // Matches total count of headers + items
+                padding: const EdgeInsets.all(
+                  16.0,
+                ), // Spacing around the list blocks
+                itemCount: listItems.length,
                 itemBuilder: (context, index) {
                   final item = listItems[index];
 
-                  // Handle Day Header
-                  if (item['type'] == 'header') {
-                    return Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Date: ${item['date']}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          Text(
-                            'Total: \$${item['total']}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
+                  // Only act on header types to kick off a "Day Block"
+                  if (item['type'] != 'header') {
+                    return const SizedBox.shrink(); // Skip expense entries in the main loop
                   }
 
-                  // Handle Expense Item
-                  final String category = item['category'];
-                  final int amount = item['amount'];
+                  final String currentDate = item['date'];
+                  final String currentTotal = item['total'].toString();
 
-                  return ListTile(
-                    leading: const CircleAvatar(
-                      radius: 20,
-                      backgroundImage: AssetImage('assets/images/food.jpg'),
-                    ),
-                    title: Text(
-                      '${category[0].toUpperCase()}${category.substring(1)}',
-                    ), // Capitalizes first letter
-                    subtitle: Text('Description of $category expense'),
-                    trailing: Text(
-                      '\$$amount',
-                      style: const TextStyle(
-                        color: Colors.red,
-                        fontWeight: FontWeight.bold,
+                  // Find all subsequent expense items belonging to this specific date block
+                  final List<Map<String, dynamic>> subItems = [];
+                  for (int i = index + 1; i < listItems.length; i++) {
+                    if (listItems[i]['type'] == 'header')
+                      break; // Stop when the next day hits
+                    subItems.add(Map<String, dynamic>.from(listItems[i]));
+                  }
+
+                  return Container(
+                    margin: const EdgeInsets.only(
+                      bottom: 20.0,
+                    ), // Space between day groups
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.grey.shade400,
+                        width: 1.5,
                       ),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 1. Day Header Block
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Date: $currentDate',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'Total: \$$currentTotal',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.red,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Thin divider right below the header before elements start
+                        if (subItems.isNotEmpty)
+                          Divider(
+                            color: Colors.grey.shade400,
+                            thickness: 1.5,
+                            height: 1.0,
+                          ),
+
+                        // 2. Expense Items List inside this Day Block
+                        ListView.separated(
+                          shrinkWrap: true, // Crucial inside Column
+                          physics:
+                              const NeverScrollableScrollPhysics(), // Disables nested scrolling conflict
+                          itemCount: subItems.length,
+                          separatorBuilder: (context, subIndex) => Divider(
+                            color: Colors.grey.shade300,
+                            thickness: 1.0,
+                            height: 1.0,
+                            indent:
+                                72.0, // Aligns divider with text, skipping the avatar
+                          ),
+                          itemBuilder: (context, subIndex) {
+                            final subItem = subItems[subIndex];
+                            final String category = subItem['category'] ?? '';
+                            final int amount = subItem['amount'] ?? 0;
+
+                            return ListTile(
+                              leading: const CircleAvatar(
+                                radius: 20,
+                                backgroundImage: AssetImage(
+                                  'assets/images/food.jpg',
+                                ),
+                              ),
+                              title: Text(
+                                category.isNotEmpty
+                                    ? '${category[0].toUpperCase()}${category.substring(1)}'
+                                    : '',
+                              ),
+                              subtitle: Text(
+                                'Description of $category expense',
+                              ),
+                              trailing: Text(
+                                '\$$amount',
+                                style: const TextStyle(
+                                  color: Colors.red,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   );
                 },
