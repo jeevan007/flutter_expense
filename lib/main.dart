@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_expense/screen/expense_tracker.dart';
+import 'package:flutter_expense/screen/login.dart';
+
 
 void main() {
   runApp(const MyApp());
@@ -14,11 +15,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Expense Tracker',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const ExpenseTracker(),
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple)),
+      home: const Login(),
     );
   }
 }
-
