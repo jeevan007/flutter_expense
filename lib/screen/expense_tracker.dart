@@ -158,7 +158,7 @@ class _ExpenseTrackerBodyState extends State<ExpenseTrackerBody> {
                     child: const Image(
                       image: AssetImage('assets/images/expense.jpg'),
                       height: 100,
-                      width: 120,
+                      width: 150,
                       fit: BoxFit.cover,
                     ),
                   ),
