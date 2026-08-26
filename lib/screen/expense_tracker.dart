@@ -116,55 +116,75 @@ class _ExpenseTrackerBodyState extends State<ExpenseTrackerBody> {
           ),
 
           // Total Balance Banner Card
-          Container(
-            height: 180,
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 52, 94, 163),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          BlocBuilder<ExpenseBloc, ExpenseState>(
+            builder: (context, state) {
+              double totalBalance = 0;
+
+              if (state is ExpenseLoaded) {
+                for (var e in state.expenses) {
+                  if (e.expense_type == 1) {
+                    // income
+                    totalBalance += e.expense_amount;
+                  } else {
+                    // expense
+                    totalBalance -= e.expense_amount;
+                  }
+                }
+              }
+
+              return Container(
+                height: 180,
+                width: double.infinity,
+                margin: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+                decoration: BoxDecoration(
+                  color: const Color.fromARGB(255, 52, 94, 163),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text(
-                        'Total Balance',
-                        style: TextStyle(fontSize: 15, color: Colors.white),
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Total Balance',
+                            style: TextStyle(fontSize: 15, color: Colors.white),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            "\$ ${totalBalance.toStringAsFixed(2)}",
+                            style: const TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
+
                     Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        '\$ 3,734',
-                        style: TextStyle(
-                          fontSize: 40,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                      padding: const EdgeInsets.all(16.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: const Image(
+                          image: AssetImage('assets/images/expense.jpg'),
+                          height: 100,
+                          width: 150,
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
                   ],
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: const Image(
-                      image: AssetImage('assets/images/expense.jpg'),
-                      height: 100,
-                      width: 150,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
           ),
 
           const Row(
@@ -239,10 +259,9 @@ class _ExpenseTrackerBodyState extends State<ExpenseTrackerBody> {
                       // ✅ Only Expense Total
                       num totalExpense = 0;
                       for (var e in expensesList) {
-                        
                         if (e.expense_type != 1) {
                           totalExpense -= e.expense_amount;
-                        }else{
+                        } else {
                           totalExpense += e.expense_amount;
                         }
                       }
@@ -267,7 +286,9 @@ class _ExpenseTrackerBodyState extends State<ExpenseTrackerBody> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    DateFormat("dd-MM-yyyy").format(DateFormat("dd-MM-yyyy").parse(date)),
+                                    DateFormat("dd-MM-yyyy").format(
+                                      DateFormat("dd-MM-yyyy").parse(date),
+                                    ),
                                     style: const TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
